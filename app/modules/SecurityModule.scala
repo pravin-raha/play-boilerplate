@@ -42,13 +42,20 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
+  def provideFacebookClient: FacebookClient = {
+    val fbId = configuration.getOptional[String]("fbId").get
+    val fbSecret = configuration.getOptional[String]("fbSecret").get
+    new FacebookClient(fbId, fbSecret)
+  }
+
+  @Provides
   def provideIndirectBasicAuthClient: IndirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator())
 
   @Provides
   def provideConfig(facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
                     casClient: CasClient, oidcClient: OidcClient[OidcProfile, OidcConfiguration], parameterClient: ParameterClient, directBasicAuthClient: DirectBasicAuthClient): Config = {
     val clients = new Clients(baseUrl + "/callback",
-      indirectBasicAuthClient)
+      indirectBasicAuthClient,facebookClient)
 
     val config = new Config(clients)
     config.addAuthorizer("admin", new RequireAnyRoleAuthorizer[Nothing]("ROLE_ADMIN"))

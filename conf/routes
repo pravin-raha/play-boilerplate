@@ -6,6 +6,8 @@
 # An example controller showing a sample home page
 GET         /                                 controllers.HomeController.index
 GET         /indirectIndex                    controllers.HomeController.indirectIndex
+GET         /facebookIndex                    controllers.HomeController.facebookIndex
+
 
 GET         /forceLogin                       controllers.HomeController.forceLogin()
 GET         /callback                         @org.pac4j.play.CallbackController.callback()
