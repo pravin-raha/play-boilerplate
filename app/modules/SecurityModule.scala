@@ -10,7 +10,8 @@ import org.pac4j.core.matching.PathMatcher
 import org.pac4j.http.client.direct.{DirectBasicAuthClient, ParameterClient}
 import org.pac4j.http.client.indirect.{FormClient, IndirectBasicAuthClient}
 import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator
-import org.pac4j.oauth.client.{FacebookClient, TwitterClient}
+import org.pac4j.oauth.client.{FacebookClient, Google2Client, OAuth10Client, TwitterClient}
+import org.pac4j.oauth.profile.OAuth10Profile
 import org.pac4j.oidc.client.OidcClient
 import org.pac4j.oidc.config.OidcConfiguration
 import org.pac4j.oidc.profile.OidcProfile
@@ -49,13 +50,32 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
+  def provideGoogle2Client: Google2Client = {
+    val key = configuration.getOptional[String]("googleKey").get
+    val secret = configuration.getOptional[String]("googleSecret").get
+    new Google2Client(key, secret)
+  }
+
+  @Provides
   def provideIndirectBasicAuthClient: IndirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator())
 
   @Provides
-  def provideConfig(facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
+  def provideOidcClient: OidcClient[OidcProfile, OidcConfiguration] = {
+    val oidcConfiguration = new OidcConfiguration()
+    oidcConfiguration.setClientId("343992089165-i1es0qvej18asl33mvlbeq750i3ko32k.apps.googleusercontent.com")
+    oidcConfiguration.setSecret("unXK_RSCbCXLTic2JACTiAo9")
+    oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
+//    oidcConfiguration.addCustomParam("prompt", "consent")
+    val oidcClient = new OidcClient[OidcProfile, OidcConfiguration](oidcConfiguration)
+//    oidcClient.addAuthorizationGenerator(new RoleAdminAuthGenerator)
+    oidcClient
+  }
+
+  @Provides
+  def provideConfig(google2Client: Google2Client, facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
                     casClient: CasClient, oidcClient: OidcClient[OidcProfile, OidcConfiguration], parameterClient: ParameterClient, directBasicAuthClient: DirectBasicAuthClient): Config = {
     val clients = new Clients(baseUrl + "/callback",
-      indirectBasicAuthClient,facebookClient)
+      indirectBasicAuthClient,facebookClient,google2Client)
 
     val config = new Config(clients)
     config.addAuthorizer("admin", new RequireAnyRoleAuthorizer[Nothing]("ROLE_ADMIN"))

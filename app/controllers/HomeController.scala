@@ -28,6 +28,10 @@ class HomeController @Inject()(val controllerComponents: SecurityComponents, con
     Ok(views.html.index())
   }
 
+  def googleIndex = Secure("GoogleClient") { implicit request =>
+    Ok(views.html.index())
+  }
+
   def forceLogin = Action { request =>
     val context: PlayWebContext = new PlayWebContext(request, playSessionStore)
     val client = config.getClients.findClient(context.getRequestParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER)).asInstanceOf[IndirectClient[Credentials, CommonProfile]]
