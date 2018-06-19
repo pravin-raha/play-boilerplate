@@ -62,20 +62,21 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   @Provides
   def provideOidcClient: OidcClient[OidcProfile, OidcConfiguration] = {
     val oidcConfiguration = new OidcConfiguration()
-    oidcConfiguration.setClientId("343992089165-i1es0qvej18asl33mvlbeq750i3ko32k.apps.googleusercontent.com")
-    oidcConfiguration.setSecret("unXK_RSCbCXLTic2JACTiAo9")
+    val key = configuration.getOptional[String]("googleKey").get
+    val secret = configuration.getOptional[String]("googleSecret").get
+    oidcConfiguration.setClientId(key)
+    oidcConfiguration.setSecret(secret)
     oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
 //    oidcConfiguration.addCustomParam("prompt", "consent")
     val oidcClient = new OidcClient[OidcProfile, OidcConfiguration](oidcConfiguration)
 //    oidcClient.addAuthorizationGenerator(new RoleAdminAuthGenerator)
     oidcClient
   }
-
   @Provides
   def provideConfig(google2Client: Google2Client, facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
                     casClient: CasClient, oidcClient: OidcClient[OidcProfile, OidcConfiguration], parameterClient: ParameterClient, directBasicAuthClient: DirectBasicAuthClient): Config = {
     val clients = new Clients(baseUrl + "/callback",
-      indirectBasicAuthClient,facebookClient,google2Client)
+      indirectBasicAuthClient,facebookClient,google2Client,provideOidcClient)
 
     val config = new Config(clients)
     config.addAuthorizer("admin", new RequireAnyRoleAuthorizer[Nothing]("ROLE_ADMIN"))

@@ -28,7 +28,7 @@ class HomeController @Inject()(val controllerComponents: SecurityComponents, con
     Ok(views.html.index())
   }
 
-  def googleIndex = Secure("Google2Client") { implicit request =>
+  def googleIndex = Secure("OidcClient") { implicit request =>
     Ok(views.html.index())
   }
 
