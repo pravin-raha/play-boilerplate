@@ -50,16 +50,6 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideGoogle2Client: Google2Client = {
-    val key = configuration.getOptional[String]("googleKey").get
-    val secret = configuration.getOptional[String]("googleSecret").get
-    new Google2Client(key, secret)
-  }
-
-  @Provides
-  def provideIndirectBasicAuthClient: IndirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator())
-
-  @Provides
   def provideOidcClient: OidcClient[OidcProfile, OidcConfiguration] = {
     val oidcConfiguration = new OidcConfiguration()
     val key = configuration.getOptional[String]("googleKey").get
@@ -73,10 +63,9 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     oidcClient
   }
   @Provides
-  def provideConfig(google2Client: Google2Client, facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
+  def provideConfig(facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
                     casClient: CasClient, oidcClient: OidcClient[OidcProfile, OidcConfiguration], parameterClient: ParameterClient, directBasicAuthClient: DirectBasicAuthClient): Config = {
-    val clients = new Clients(baseUrl + "/callback",
-      indirectBasicAuthClient,facebookClient,google2Client,provideOidcClient)
+    val clients = new Clients(baseUrl + "/callback",provideOidcClient)
 
     val config = new Config(clients)
     config.addAuthorizer("admin", new RequireAnyRoleAuthorizer[Nothing]("ROLE_ADMIN"))

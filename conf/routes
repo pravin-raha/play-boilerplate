@@ -8,7 +8,7 @@ GET         /                                 controllers.HomeController.index
 GET         /indirectIndex                    controllers.HomeController.indirectIndex
 GET         /facebookIndex                    controllers.HomeController.facebookIndex
 GET         /googleIndex                      controllers.HomeController.googleIndex
-
+GET         /cats                             controllers.HomeController.getCats
 
 GET         /forceLogin                       controllers.HomeController.forceLogin()
 GET         /callback                         @org.pac4j.play.CallbackController.callback()
